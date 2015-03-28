@@ -1,0 +1,25 @@
+AnalyzeWords is the has the main function:
+	- set path to file and filename that is required to analyze
+	- set max and min word-count pairs that are required
+	
+StopWords:
+	- has stop words
+	- functions are written to clear, add, remove, check, display Stop Words
+	
+CommonWords:
+	- set path to existing .properties file (propFile)
+	- function to read line
+	- function to clean words with special characters
+	- function to split words into array
+	- function to generate map with word-count
+	- function to have new word-count vs existing word-count in file
+	- function to write updated and new word-count to file
+	- function to find maximum occurrences of word specified by user 
+	- function to find minimum occurrences of word specified by user
+	
+	
+How to Run:
+- Mention file to analyze in AnalyzeWords.java
+- Mention .properties file to save data in CommonWords.java
+- Use StopWrods.java to add Stop Words
+- Mention max and min occurrence in AnalyzeWords.java
