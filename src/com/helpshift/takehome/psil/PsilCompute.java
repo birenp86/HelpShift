@@ -32,7 +32,7 @@ public class PsilCompute {
 		while (stdin.hasNext()) {
 			String line = stdin.nextLine();
 			//replaces new line and tab with " "
-			line = line.replaceAll("[\\n\\t]", " ");
+			line = line.replaceAll("[\\n\\t]", "");
 			// adds spaces for splitting user input
 			line = line.replaceAll("[(]", "( ");
 			line = line.replaceAll("[)]", " )");
@@ -98,12 +98,12 @@ public class PsilCompute {
 			System.out.println("Result: " +vals.pop());
 		} catch (java.util.EmptyStackException e) {
 			System.out.println("Invalid Program");
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 
 		catch (java.lang.NumberFormatException e) {
 			System.out.println("Invalid Program");
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 
