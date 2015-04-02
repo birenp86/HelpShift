@@ -1,8 +1,10 @@
 package com.helpshift.takehome.psil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -11,6 +13,12 @@ public class PsilCompute {
 
 	private static PsilCompute psilCompute = null;
 	List<String> inputList = new ArrayList<String>();
+	Map<String, Double> addBindValue = new HashMap<String, Double>();
+	//stack to store "(" and numerics
+	Stack<String> ops  = new Stack<String>();
+	//stack to store operands
+	Stack<Double> vals = new Stack<Double>();
+	
 
 	/**
 	 * returns object of Class PsilCompute
@@ -28,10 +36,11 @@ public class PsilCompute {
 	 * @param stdin
 	 */
 	public void readInput(Scanner stdin) {
+		
 		//reads user input
 		while (stdin.hasNext()) {
 			String line = stdin.nextLine();
-			//replaces new line and tab with " "
+			//replaces new line and tab with ""
 			line = line.replaceAll("[\\n\\t]", "");
 			// adds spaces for splitting user input
 			line = line.replaceAll("[(]", "( ");
@@ -60,12 +69,7 @@ public class PsilCompute {
 	 */
 	private void calculateResult(List<String> inputList) {
 		try {
-			//stack to store "(" and numerics
-			Stack<String> ops  = new Stack<String>();
-			//stack to store operands
-			Stack<Double> vals = new Stack<Double>();
 			ListIterator<String> iterList = inputList.listIterator();
-
 			while(iterList.hasNext()){ 
 				String s = (String) iterList.next();
 				if (s.equals("("))    vals.push(-1.0);
@@ -84,7 +88,7 @@ public class PsilCompute {
 							loop = false;
 						}
 						else{
-							if      (op.equals("+"))    v2 = v2 + v1;
+							if (op.equals("+"))    v2 = v2 + v1;
 							else if (op.equals("*"))    v2 = v2 * v1;
 							else if (op.equals("-"))    v2 = v2 - v1;
 							else if (op.equals("/"))    v2 = v2 / v1;
@@ -93,17 +97,44 @@ public class PsilCompute {
 						}
 					}
 				}
-				else vals.push(Double.parseDouble(s));
+				else if(s.equalsIgnoreCase("bind")){
+					Double bindValueDouble = 0.0;
+					String bindString = (String) iterList.next();
+					String bindValueString = (String) iterList.next();
+					if(addBindValue.containsKey(bindValueString))
+						bindValueDouble = addBindValue.get(bindValueString);
+					else
+						bindValueDouble = Double.parseDouble(bindValueString);
+					String bindRP = (String) iterList.next();
+					if(bindRP.equalsIgnoreCase("(")){
+						calculateResult(inputList);
+					}
+					else if(bindRP.equalsIgnoreCase(")")){
+						//vals.pop();
+						addBindValue.put(bindString, bindValueDouble);
+						if(inputList.size() == 5){
+							vals.push(bindValueDouble);
+						}
+					}
+					System.out.println(bindString+" --> "+bindValueDouble);
+				}
+				else {
+					if(addBindValue.containsKey(s))
+						vals.push(addBindValue.get(s));
+					else
+						vals.push(Double.parseDouble(s));
+				}
 			}
-			System.out.println("Result: " +vals.pop());
+			Double val = vals.pop();
+			System.out.println("Result: " +val);
 		} catch (java.util.EmptyStackException e) {
 			System.out.println("Invalid Program");
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 		catch (java.lang.NumberFormatException e) {
 			System.out.println("Invalid Program");
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 
