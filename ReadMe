@@ -1,4 +1,4 @@
-AnalyzeWords is the has the main function:
+AnalyzeWords is the main function:
 	- set path to file and filename that is required to analyze
 	- set max and min word-count pairs that are required
 	
@@ -23,3 +23,20 @@ How to Run:
 - Mention .properties file to save data in CommonWords.java
 - Use StopWrods.java to add Stop Words
 - Mention max and min occurrence in AnalyzeWords.java
+
+
+
+
+
+PronouncedSil is the main function:
+	- creates scanner object
+
+PsilCompute contains the logic to parse user-input and expression evaluation
+
+
+How to Run:
+- Run the program
+- Enter User Input
+NOTE: “ ” (space) is required mandatory between operand and value
+eg: (*10) is Invalid, (* 10) is Valid
+- Once user has enter the expression, type “exit” to evaluate
