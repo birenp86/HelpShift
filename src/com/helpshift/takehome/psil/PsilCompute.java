@@ -1,6 +1,8 @@
 package com.helpshift.takehome.psil;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -18,7 +20,7 @@ public class PsilCompute {
 	Stack<String> ops  = new Stack<String>();
 	//stack to store operands
 	Stack<Double> vals = new Stack<Double>();
-	
+
 
 	/**
 	 * returns object of Class PsilCompute
@@ -36,7 +38,7 @@ public class PsilCompute {
 	 * @param stdin
 	 */
 	public void readInput(Scanner stdin) {
-		
+
 		//reads user input
 		while (stdin.hasNext()) {
 			String line = stdin.nextLine();
@@ -59,64 +61,99 @@ public class PsilCompute {
 		// Display user input
 		displayInput();
 		//calculate input
-		calculateResult(inputList);
-
+		ListIterator<String> iterList = inputList.listIterator();
+		calculateResult(inputList, iterList);
 	}
 
 	/**
 	 * Gets String List and does the arithmetic calculation
 	 * @param inputList
+	 * @param iterList2 
 	 */
-	private void calculateResult(List<String> inputList) {
+	private void calculateResult(List<String> inputList, ListIterator<String> iterList) {
 		try {
-			ListIterator<String> iterList = inputList.listIterator();
+			boolean cont = countPr(inputList);
+			if(cont == false){
+				System.out.println("Invalid Parenthesis");
+				throw new NumberFormatException();
+			}
 			while(iterList.hasNext()){ 
 				String s = (String) iterList.next();
-				if (s.equals("("))    vals.push(-1.0);
+				if (s.equals("("))    vals.push(0.0);
 				else if (s.equals("+"))    ops.push(s);
 				else if (s.equals("-"))    ops.push(s);
 				else if (s.equals("*"))    ops.push(s);
 				else if (s.equals("/"))    ops.push(s);
 				else if (s.equals(")")) {
-					boolean loop = true;
-					while(loop == true){
-						String op = ops.pop();
-						double v1 = vals.pop();
-						double v2 = vals.pop();
-						if(v2 == -1.0){
-							vals.push(v1);
-							loop = false;
+					String op = ops.pop();
+					if (op.equals("-")){
+						List<Double> subList = new ArrayList<Double>();
+						boolean loopStack = true;
+						while(loopStack){
+							double v1 = vals.pop();
+							if(v1 == 0.0)
+								loopStack = false;
+							else{
+								subList.add(v1);
+							}
 						}
-						else{
-							if (op.equals("+"))    v2 = v2 + v1;
-							else if (op.equals("*"))    v2 = v2 * v1;
-							else if (op.equals("-"))    v2 = v2 - v1;
-							else if (op.equals("/"))    v2 = v2 / v1;
-							vals.push(v2);
-							ops.push(op);
+						Collections.reverse(subList);
+						Double dVal = subList.get(0);
+						subList.remove(0);
+						for(Double subDouble : subList){
+							dVal = dVal - subDouble;
+						}
+						vals.push(dVal);
+						ops.push(op);
+					}
+					else{
+						boolean loop = true;
+						while(loop == true){							
+							double v1 = vals.pop();
+							double v2 = vals.pop();
+							if(v2 == 0.0){
+								vals.push(v1);
+								loop = false;
+							}
+							else{
+								if (op.equals("+"))    v2 = v2 + v1;
+								else if (op.equals("*"))    v2 = v2 * v1;
+								else if (op.equals("/"))    v2 = v2 / v1;
+								vals.push(v2);
+								ops.push(op);
+							}
 						}
 					}
 				}
 				else if(s.equalsIgnoreCase("bind")){
-					Double bindValueDouble = 0.0;
-					String bindString = (String) iterList.next();
-					String bindValueString = (String) iterList.next();
-					if(addBindValue.containsKey(bindValueString))
-						bindValueDouble = addBindValue.get(bindValueString);
-					else
-						bindValueDouble = Double.parseDouble(bindValueString);
-					String bindRP = (String) iterList.next();
-					if(bindRP.equalsIgnoreCase("(")){
-						calculateResult(inputList);
+					if(addBindValue.containsKey(s)){
+						vals.push(addBindValue.get(s));
 					}
-					else if(bindRP.equalsIgnoreCase(")")){
-						//vals.pop();
-						addBindValue.put(bindString, bindValueDouble);
-						if(inputList.size() == 5){
-							vals.push(bindValueDouble);
+					else{
+						boolean continueRun = false;
+						Double bindValueDouble = 0.0;
+						String bindString = (String) iterList.next();
+						continueRun = checkBindString(bindString);
+						if(continueRun == true){
+							String bindValueString = (String) iterList.next();
+							if(addBindValue.containsKey(bindValueString))
+								bindValueDouble = addBindValue.get(bindValueString);
+							else
+								bindValueDouble = Double.parseDouble(bindValueString);
+							String bindRP = (String) iterList.next();
+							if(bindRP.equalsIgnoreCase("(")){						
+								calculateResult(inputList, iterList);
+							}
+							else if(bindRP.equalsIgnoreCase(")")){
+								//vals.pop();
+								addBindValue.put(bindString, bindValueDouble);
+								if(inputList.size() == 5){
+									vals.push(bindValueDouble);
+								}
+							}
+							System.out.println(bindString+" --> "+bindValueDouble);
 						}
 					}
-					System.out.println(bindString+" --> "+bindValueDouble);
 				}
 				else {
 					if(addBindValue.containsKey(s))
@@ -127,6 +164,7 @@ public class PsilCompute {
 			}
 			Double val = vals.pop();
 			System.out.println("Result: " +val);
+
 		} catch (java.util.EmptyStackException e) {
 			System.out.println("Invalid Program");
 			//e.printStackTrace();
@@ -135,6 +173,17 @@ public class PsilCompute {
 		catch (java.lang.NumberFormatException e) {
 			System.out.println("Invalid Program");
 			//e.printStackTrace();
+		}
+	}
+
+	private boolean checkBindString(String bindString) {
+		try{
+			Double checkDouble = Double.parseDouble(bindString);
+			System.out.println("Invalid bind value");
+			return false;
+		}
+		catch (java.lang.NumberFormatException e) {
+			return true;
 		}
 	}
 
@@ -147,5 +196,21 @@ public class PsilCompute {
 			System.out.print(str+" ");
 		}
 		System.out.println("\n");
+	}
+
+	private boolean countPr(List<String> inputList) {
+		int rightP = 0;
+		int leftP = 0;
+
+		for(String temp : inputList){
+			if(temp.equals("("))
+				leftP = leftP+1;
+			else if(temp.equals(")"))
+				rightP = rightP+1;
+		}
+		if(rightP == leftP)
+			return true;
+		else
+			return false;		
 	}
 }
